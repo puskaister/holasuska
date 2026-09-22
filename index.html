@@ -54,7 +54,7 @@
     display:flex;
     justify-content:center;
   }
-  .page{width:100%;max-width:720px;}
+  .page{width:100%;max-width:940px;}
 
   /* masthead */
   .masthead{
@@ -140,23 +140,32 @@
   }
 
   section.timeline{
-    display:flex;
-    flex-direction:column;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px 20px;
+  }
+  @media (max-width:680px){
+    section.timeline{grid-template-columns:1fr;}
   }
   .entry{
-    display:grid;
-    grid-template-columns:52px 1fr;
-    gap:14px;
-    padding-block:16px;
-    border-top:1px solid var(--rule);
+    display:flex;
+    flex-direction:column;
+    border:1px solid var(--rule);
+    border-radius:3px;
+    background:var(--paper-raised);
+    box-shadow:var(--shadow);
+    overflow:hidden;
   }
-  .entry:last-child{border-bottom:1px solid var(--rule);}
-  .entry-no{
-    font-family:"IBM Plex Mono",monospace;
-    font-variant-numeric:tabular-nums;
-    font-size:0.72rem;
-    color:var(--ink-soft);
-    padding-top:3px;
+  .entry-visual{
+    aspect-ratio:16/9;
+    border-bottom:1px solid var(--rule);
+  }
+  .entry-visual svg{display:block;width:100%;height:100%;}
+  .entry-body{
+    padding:14px 16px 16px;
+    display:flex;
+    flex-direction:column;
+    flex:1;
   }
   .entry-head{
     display:flex;
@@ -197,10 +206,10 @@
     font-size:0.9rem;
     line-height:1.55;
     color:var(--ink-soft);
-    max-width:60ch;
+    flex:1;
   }
   .entry-source{
-    margin-top:6px;
+    margin-top:10px;
     font-size:0.76rem;
     color:var(--ink-soft);
     font-family:"IBM Plex Mono",monospace;
@@ -256,10 +265,6 @@
     line-height:1.6;
   }
 
-  @media (max-width:480px){
-    .entry{grid-template-columns:1fr;}
-    .entry-no{display:none;}
-  }
 </style>
 
 <div class="page">
@@ -344,6 +349,44 @@
   // SEED_LAST_CHECKED:END
   var state = {timeline: SEED_TIMELINE.slice(), reference: SEED_REFERENCE.slice(), filter:"mind", lastChecked:SEED_LAST_CHECKED};
 
+  function hashCode(str){
+    var h = 0;
+    for(var i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+    return h;
+  }
+
+  function categoryColorVar(cat){
+    if(cat === "jogalkotas") return "var(--law)";
+    if(cat === "vita") return "var(--dispute)";
+    if(cat === "elemzes") return "var(--analysis)";
+    return "var(--brass)";
+  }
+
+  function entryVisualSvg(item, no){
+    var h = hashCode(item.id);
+    var rayCount = 10 + (h % 5);
+    var rotate = h % 360;
+    var color = categoryColorVar(item.category);
+    var rays = "";
+    for(var i=0;i<rayCount;i++){
+      var angle = (360/rayCount)*i;
+      var rad = angle*Math.PI/180;
+      var x1 = (50 + Math.cos(rad)*30).toFixed(1);
+      var y1 = (50 + Math.sin(rad)*30).toFixed(1);
+      var x2 = (50 + Math.cos(rad)*38).toFixed(1);
+      var y2 = (50 + Math.sin(rad)*38).toFixed(1);
+      rays += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="1" stroke-linecap="round" opacity="0.65"/>';
+    }
+    var label = "№ " + String(no).padStart(2,"0");
+    return '<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">' +
+      '<rect width="100" height="100" fill="var(--paper-raised)"/>' +
+      '<g transform="rotate('+rotate+' 50 50)">'+rays+'</g>' +
+      '<circle cx="50" cy="50" r="29" fill="none" stroke="'+color+'" stroke-width="1.6"/>' +
+      '<circle cx="50" cy="50" r="23.5" fill="none" stroke="'+color+'" stroke-width="0.8" opacity="0.55"/>' +
+      '<text x="50" y="53.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="'+color+'" letter-spacing="0.5">'+label+'</text>' +
+    '</svg>';
+  }
+
   function fmtRelative(iso){
     if(!iso) return "ismeretlen";
     var d = new Date(iso);
@@ -377,11 +420,11 @@
       return;
     }
     el.innerHTML = visible.map(function(item){
-      var no = String(numberById[item.id]).padStart(2,"0");
+      var no = numberById[item.id];
       return '' +
         '<article class="entry">' +
-          '<div class="entry-no">№ '+no+'</div>' +
-          '<div>' +
+          '<div class="entry-visual">'+entryVisualSvg(item, no)+'</div>' +
+          '<div class="entry-body">' +
             '<div class="entry-head">' +
               '<span class="entry-date">'+item.dateLabel+'</span>' +
               '<span class="tag '+item.category+'">'+CATEGORY_LABEL[item.category]+'</span>' +

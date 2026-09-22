@@ -1,0 +1,430 @@
+<title>Vagyonvédelmi Napló</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --paper:#f6f1e4;
+    --paper-raised:#ece3ce;
+    --ink:#211c13;
+    --ink-soft:#75694f;
+    --rule:#d9cca8;
+    --brass:#9c6b2b;
+    --brass-strong:#6f4c1c;
+    --law:#2f5d4f;
+    --dispute:#9c3b2f;
+    --analysis:#33556f;
+    --shadow: 0 1px 0 rgba(33,28,19,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#161209;
+      --paper-raised:#1f1a10;
+      --ink:#ece2c9;
+      --ink-soft:#a5987a;
+      --rule:#3a3120;
+      --brass:#d6a35a;
+      --brass-strong:#eec284;
+      --law:#7fb69d;
+      --dispute:#dd8b7d;
+      --analysis:#8db3d1;
+      --shadow: 0 1px 0 rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#161209;
+    --paper-raised:#1f1a10;
+    --ink:#ece2c9;
+    --ink-soft:#a5987a;
+    --rule:#3a3120;
+    --brass:#d6a35a;
+    --brass-strong:#eec284;
+    --law:#7fb69d;
+    --dispute:#dd8b7d;
+    --analysis:#8db3d1;
+    --shadow: 0 1px 0 rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans",-apple-system,sans-serif;
+    padding-inline:16px;
+    padding-block:32px 64px;
+    display:flex;
+    justify-content:center;
+  }
+  .page{width:100%;max-width:720px;}
+
+  /* masthead */
+  .masthead{
+    display:flex;
+    align-items:flex-start;
+    gap:16px;
+    padding-bottom:20px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:6px;
+    flex-wrap:wrap;
+  }
+  .seal{flex:none;width:56px;height:56px;}
+  .masthead-text{flex:1;min-width:220px;}
+  h1{
+    font-family:"Fraunces",serif;
+    font-weight:600;
+    font-size:clamp(1.7rem,5vw,2.35rem);
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+  }
+  .subtitle{
+    color:var(--ink-soft);
+    font-size:0.92rem;
+    line-height:1.5;
+    max-width:52ch;
+  }
+  .status-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:16px;
+    padding-top:12px;
+    border-top:1px solid var(--rule);
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    flex-wrap:wrap;
+  }
+  .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--law);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--law) 22%, transparent);
+    flex:none;
+  }
+  .status-row strong{color:var(--ink);font-weight:500;}
+
+  /* filters */
+  .filters{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:22px 0 18px;
+  }
+  .chip{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.74rem;
+    letter-spacing:0.02em;
+    padding:6px 12px;
+    border-radius:999px;
+    border:1px solid var(--rule);
+    background:transparent;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .chip[aria-pressed="true"]{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:var(--paper);
+  }
+  :root[data-theme="dark"] .chip[aria-pressed="true"],
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .chip[aria-pressed="true"]{
+      background:var(--brass-strong);
+      border-color:var(--brass-strong);
+      color:#1a1408;
+    }
+  }
+  :root[data-theme="dark"] .chip[aria-pressed="true"]{
+    background:var(--brass-strong);
+    border-color:var(--brass-strong);
+    color:#1a1408;
+  }
+
+  section.timeline{
+    display:flex;
+    flex-direction:column;
+  }
+  .entry{
+    display:grid;
+    grid-template-columns:52px 1fr;
+    gap:14px;
+    padding-block:16px;
+    border-top:1px solid var(--rule);
+  }
+  .entry:last-child{border-bottom:1px solid var(--rule);}
+  .entry-no{
+    font-family:"IBM Plex Mono",monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    padding-top:3px;
+  }
+  .entry-head{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:4px;
+  }
+  .entry-date{
+    font-family:"IBM Plex Mono",monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:0.76rem;
+    color:var(--ink-soft);
+  }
+  .tag{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.68rem;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    padding:2px 7px;
+    border-radius:3px;
+    border:1px solid currentColor;
+  }
+  .tag.jogalkotas{color:var(--law);}
+  .tag.vita{color:var(--dispute);}
+  .tag.elemzes{color:var(--analysis);}
+  .entry-title{
+    font-family:"Fraunces",serif;
+    font-weight:500;
+    font-size:1.08rem;
+    line-height:1.35;
+    text-wrap:balance;
+  }
+  .entry-title a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule);}
+  .entry-title a:hover{border-bottom-color:var(--brass);}
+  .entry-summary{
+    margin-top:6px;
+    font-size:0.9rem;
+    line-height:1.55;
+    color:var(--ink-soft);
+    max-width:60ch;
+  }
+  .entry-source{
+    margin-top:6px;
+    font-size:0.76rem;
+    color:var(--ink-soft);
+    font-family:"IBM Plex Mono",monospace;
+  }
+
+  .empty{
+    padding:32px 0;
+    color:var(--ink-soft);
+    font-size:0.9rem;
+  }
+
+  h2.section-heading{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.78rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:40px 0 4px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--ink);
+  }
+  .reference-list{display:flex;flex-direction:column;}
+  .ref-entry{
+    padding-block:12px;
+    border-top:1px solid var(--rule);
+    display:flex;
+    gap:12px;
+    align-items:baseline;
+    flex-wrap:wrap;
+  }
+  .ref-entry:last-child{border-bottom:1px solid var(--rule);}
+  .ref-entry a{
+    font-family:"Fraunces",serif;
+    font-weight:500;
+    font-size:0.98rem;
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid var(--rule);
+  }
+  .ref-entry a:hover{border-bottom-color:var(--brass);}
+  .ref-source{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+  }
+
+  footer{
+    margin-top:44px;
+    padding-top:16px;
+    border-top:1px solid var(--rule);
+    font-size:0.76rem;
+    color:var(--ink-soft);
+    line-height:1.6;
+  }
+
+  @media (max-width:480px){
+    .entry{grid-template-columns:1fr;}
+    .entry-no{display:none;}
+  }
+</style>
+
+<div class="page">
+  <div class="masthead">
+    <svg class="seal" viewBox="0 0 56 56" aria-hidden="true">
+      <circle cx="28" cy="28" r="26" fill="none" stroke="var(--brass)" stroke-width="1.4"/>
+      <circle cx="28" cy="28" r="21" fill="none" stroke="var(--brass)" stroke-width="1"/>
+      <text x="28" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--brass)" letter-spacing="1">NVVH</text>
+      <text x="28" y="37" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6" fill="var(--ink-soft)" letter-spacing="1.5">FIGYELŐ</text>
+    </svg>
+    <div class="masthead-text">
+      <h1>Vagyonvédelmi Napló</h1>
+      <div class="subtitle">Élőben frissülő hírfolyam a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal (NVVH) felállításáról, jogszabályi hátteréről és az azt övező vitákról.</div>
+      <div class="status-row">
+        <span class="dot" id="status-dot"></span>
+        <span>Utolsó ellenőrzés: <strong id="last-checked">—</strong></span>
+        <span>·</span>
+        <span id="article-count">— bejegyzés</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters" id="filters" role="group" aria-label="Szűrés kategória szerint">
+    <button class="chip" data-filter="mind" aria-pressed="true">Mind</button>
+    <button class="chip" data-filter="jogalkotas" aria-pressed="false">Jogalkotás</button>
+    <button class="chip" data-filter="vita" aria-pressed="false">Vita és kritika</button>
+    <button class="chip" data-filter="elemzes" aria-pressed="false">Elemzés</button>
+  </div>
+
+  <section class="timeline" id="timeline"></section>
+
+  <h2 class="section-heading">Háttér és jogszabályok</h2>
+  <div class="reference-list" id="reference-list"></div>
+
+  <footer>
+    A lista a nyilvános magyar hírportálokon és jogszabálytárakban elérhető cikkeket gyűjti össze a témában. Naponta egyszer automatikusan frissül; az egyes cikkek tartalmáért a forrásul szolgáló kiadványok felelősek.
+  </footer>
+</div>
+
+<script>
+(function(){
+  var CATEGORY_LABEL = {jogalkotas:"Jogalkotás", vita:"Vita és kritika", elemzes:"Elemzés", alapinfo:"Alapinfo"};
+
+  var SEED_TIMELINE = [
+    {id:"telex-20260710", date:"2026-07-10", dateLabel:"2026. júl. 10.", category:"jogalkotas", source:"Telex", title:"Benyújtotta a kormány a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatalt létrehozó törvényjavaslatot", url:"https://telex.hu/belfold/2026/07/10/nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-hivatal-torvenyjavaslat-benyujtas", summary:"A kormány benyújtotta az NVVH-t létrehozó törvényjavaslatot az Országgyűlésnek."},
+    {id:"index-20260728", date:"2026-07-28", dateLabel:"2026. júl. 28.", category:"jogalkotas", source:"Index", title:"Megszavazta a parlament, jön a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal", url:"https://index.hu/belfold/2026/07/28/orszaggyules-parlament-nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-hivatal-nvvh/", summary:"Az Országgyűlés 143 igen szavazattal elfogadta a hivatalt létrehozó törvényt."},
+    {id:"hvg-20260728", date:"2026-07-28", dateLabel:"2026. júl. 28.", category:"jogalkotas", source:"HVG", title:"Megszavazta a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal felállítását az Országgyűlés", url:"https://hvg.hu/itthon/20260728_megszavaz-nemzet-vagyonvisszaszerzes-vagyonvedelem-hivatal-felallit-orszaggyules", summary:"A hivatal a kormánytól szervezetileg és szakmailag független szervként jön létre."},
+    {id:"mandiner-20260728", date:"2026-07-28", dateLabel:"2026. júl. 28.", category:"jogalkotas", source:"Mandiner", title:"Megszavazta a parlament a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal felállításáról szóló javaslatot", url:"https://mandiner.hu/belfold/2026/07/megszavazta-a-parlament-a-nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-hivatal-felallitasarol-szolo-javaslatot", summary:"Kormánypárti nézőpontból számol be a hivatal felállításáról szóló szavazásról."},
+    {id:"telex-20260728b", date:"2026-07-28", dateLabel:"2026. júl. 28.", category:"vita", source:"Telex", title:"Megszavazták a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatalról szóló törvényjavaslatot", url:"https://telex.hu/belfold/2026/07/28/nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-hivatal-szavazas-tisza-rendszervaltas-magyar-peter", summary:"A szavazás után éles vita bontakozott ki a Tisza Párt és a kormánypártok között a hivatal szerepéről."},
+    {id:"444-20260828", date:"2026-08-28", dateLabel:"2026. aug. 28.", category:"vita", source:"444.hu", title:"Az ellenzék ÁVH-ra keresztelte a vagyonvisszaszerzési hivatalt, Magyar Péter szerint nincsenek szavak", url:"https://444.hu/2026/08/28/az-ellenzek-avh-ra-keresztelte-a-vagyonvisszaszerzesi-hivatalt-magyar-peter-szerint-nincsenek-szavak", summary:"Az ellenzék és a Fidesz is az egykori ÁVH-hoz hasonlította az új hivatalt, amire Magyar Péter élesen reagált."},
+    {id:"444-20260913", date:"2026-09-13", dateLabel:"2026. szept. 13.", category:"vita", source:"444.hu", title:"Orbán előre megfenyegette a vagyonvisszaszerzési hivatal munkatársait", url:"https://444.hu/2026/09/13/orban-elore-megfenyegette-a-vagyonvisszaszerzesi-hivatal-munkatarsait", summary:"Orbán Viktor jelezte, hogy egy esetleges Fidesz-kormányzás számon kérné a hivatal munkatársait."},
+    {id:"hetek-202609", date:"2026-09-10", dateLabel:"2026. szeptember", category:"elemzes", source:"Hetek", title:"Aggályok és kritikák kereszttüzében a Vagyonvisszaszerzési Hivatal", url:"https://www.hetek.hu/cikkek/belfold/2026szeptember/aggalyok-es-kritikak-kereszttuzeben-a-vagyonvisszaszerzesi", summary:"Áttekintés az alkotmányos és szakmai aggályokról, amelyek a hivatal felállítása kapcsán felmerültek."},
+    {id:"index-20260921", date:"2026-09-21", dateLabel:"2026. szept. 21.", category:"vita", source:"Index", title:"A Fidesz támadásba lendült, a párt szerint 13 alaptörvényi rendelkezést sért az új szuperhivatalról szóló törvény", url:"https://index.hu/belfold/2026/09/21/nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-torveny-magyar-peter-orban-viktor-alkotmanybirosag-utolagos-normakontroll/", summary:"A Fidesz–KDNP frakció 46 oldalas beadványban azt állítja, hogy a törvény tucatnyi ponton sérti az Alaptörvényt."}
+  ];
+
+  var SEED_REFERENCE = [
+    {id:"wikipedia-nvvh", source:"Wikipédia", title:"Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal", url:"https://hu.wikipedia.org/wiki/Nemzeti_Vagyonvisszaszerz%C3%A9si_%C3%A9s_Vagyonv%C3%A9delmi_Hivatal"},
+    {id:"jogtar-nvvh-tv", source:"Jogtár", title:"2026. évi XXXIV. törvény a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatalról", url:"https://net.jogtar.hu/jogszabaly?docid=a2600034.tv"},
+    {id:"mnvvh-hivatalrol", source:"MNVVH.hu", title:"A Hivatalról — hivatalos bemutatkozó oldal", url:"https://mnvvh.hu/a-hivatalrol"},
+    {id:"jogaszvilag-eljarasok", source:"Jogászvilág", title:"A Hivatal eljárásairól dióhéjban (1. rész)", url:"https://jogaszvilag.hu/szakma/a-nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-hivatal-eljarasairol-diohejban/"},
+    {id:"jogaszvilag-valtozasok", source:"Jogászvilág", title:"A törvény korábbi javaslathoz képesti főbb változásai", url:"https://jogaszvilag.hu/szakma/a-nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-hivatalrol-szolo-torveny-a-korabbi-javaslathoz-kepest-bekovetkezett-fobb-valtozasok/"},
+    {id:"mfor-kihirdettek", source:"mfor.hu", title:"Kihirdették: különleges jogállású szerv lesz a vagyonvisszaszerzési hivatal", url:"https://mfor.hu/cikkek/kozerdeku/kihirdettek-kulonleges-jogallasu-szerv-vagyonvisszaszerzesi-hivatal.html"},
+    {id:"drujvary-elemzes", source:"drujvary.hu", title:"Eltűnt vagyon és a Hivatal: tényleg visszaszerezhető minden?", url:"https://drujvary.hu/nemzeti-vagyonvisszaszerzesi-es-vedelmi-hivatal/"}
+  ];
+
+  var state = {timeline: SEED_TIMELINE.slice(), reference: SEED_REFERENCE.slice(), filter:"mind", lastChecked:null};
+
+  function fmtRelative(iso){
+    if(!iso) return "ismeretlen";
+    var d = new Date(iso);
+    if(isNaN(d)) return "ismeretlen";
+    var diffMin = Math.round((Date.now()-d.getTime())/60000);
+    if(diffMin < 1) return "épp most";
+    if(diffMin < 60) return diffMin+" perce";
+    var diffH = Math.round(diffMin/60);
+    if(diffH < 24) return diffH+" órája";
+    var diffD = Math.round(diffH/24);
+    return diffD+" napja";
+  }
+
+  function renderStatus(){
+    document.getElementById("last-checked").textContent = fmtRelative(state.lastChecked);
+    document.getElementById("article-count").textContent = (state.timeline.length + state.reference.length) + " bejegyzés";
+  }
+
+  function renderTimeline(){
+    var sorted = state.timeline.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+    var withNumbers = state.timeline.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; })
+      .map(function(item, idx){ return Object.assign({}, item, {no: idx+1}); });
+    var numberById = {};
+    withNumbers.forEach(function(it){ numberById[it.id] = it.no; });
+
+    var visible = state.filter === "mind" ? sorted : sorted.filter(function(it){ return it.category === state.filter; });
+
+    var el = document.getElementById("timeline");
+    if(visible.length === 0){
+      el.innerHTML = '<div class="empty">Nincs bejegyzés ebben a kategóriában.</div>';
+      return;
+    }
+    el.innerHTML = visible.map(function(item){
+      var no = String(numberById[item.id]).padStart(2,"0");
+      return '' +
+        '<article class="entry">' +
+          '<div class="entry-no">№ '+no+'</div>' +
+          '<div>' +
+            '<div class="entry-head">' +
+              '<span class="entry-date">'+item.dateLabel+'</span>' +
+              '<span class="tag '+item.category+'">'+CATEGORY_LABEL[item.category]+'</span>' +
+            '</div>' +
+            '<div class="entry-title"><a href="'+item.url+'" target="_blank" rel="noopener">'+item.title+'</a></div>' +
+            '<div class="entry-summary">'+item.summary+'</div>' +
+            '<div class="entry-source">'+item.source+'</div>' +
+          '</div>' +
+        '</article>';
+    }).join("");
+  }
+
+  function renderReference(){
+    var el = document.getElementById("reference-list");
+    el.innerHTML = state.reference.map(function(item){
+      return '' +
+        '<div class="ref-entry">' +
+          '<a href="'+item.url+'" target="_blank" rel="noopener">'+item.title+'</a>' +
+          '<span class="ref-source">'+item.source+'</span>' +
+        '</div>';
+    }).join("");
+  }
+
+  function renderAll(){ renderStatus(); renderTimeline(); renderReference(); }
+  renderAll();
+  setInterval(renderStatus, 60000);
+
+  document.getElementById("filters").addEventListener("click", function(e){
+    var btn = e.target.closest(".chip");
+    if(!btn) return;
+    state.filter = btn.dataset.filter;
+    Array.prototype.forEach.call(document.querySelectorAll(".chip"), function(c){
+      c.setAttribute("aria-pressed", String(c === btn));
+    });
+    renderTimeline();
+  });
+
+  // Live hydration from the shared db, when available.
+  (async function(){
+    try{
+      var db = await (window.claude && window.claude.use ? window.claude.use("db") : Promise.resolve(null));
+      if(!db) return;
+
+      db.collection("articles").where("section","==","hirfolyam").orderBy("date","desc").limit(300).onSnapshot(function(snap){
+        var items = snap.docs.map(function(d){ return d.data(); }).filter(Boolean);
+        if(items.length){ state.timeline = items; renderStatus(); renderTimeline(); }
+      }, function(){ /* keep seed data on error */ });
+
+      db.collection("articles").where("section","==","hatter").onSnapshot(function(snap){
+        var items = snap.docs.map(function(d){ return d.data(); }).filter(Boolean);
+        if(items.length){ state.reference = items; renderStatus(); renderReference(); }
+      }, function(){ /* keep seed data on error */ });
+
+      db.doc("meta/status").onSnapshot(function(doc){
+        if(doc.exists){
+          var data = doc.data();
+          if(data && data.lastChecked){ state.lastChecked = data.lastChecked; renderStatus(); }
+        }
+      }, function(){ /* keep unknown status on error */ });
+    }catch(e){ /* db unavailable in this view; seed data already rendered */ }
+  })();
+})();
+</script>

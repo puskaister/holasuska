@@ -325,7 +325,8 @@
     {id:"drujvary-elemzes", source:"drujvary.hu", title:"Eltűnt vagyon és a Hivatal: tényleg visszaszerezhető minden?", url:"https://drujvary.hu/nemzeti-vagyonvisszaszerzesi-es-vedelmi-hivatal/"}
   ];
 
-  var state = {timeline: SEED_TIMELINE.slice(), reference: SEED_REFERENCE.slice(), filter:"mind", lastChecked:null};
+  var SEED_LAST_CHECKED = "2026-09-22T00:00:00.000Z";
+  var state = {timeline: SEED_TIMELINE.slice(), reference: SEED_REFERENCE.slice(), filter:"mind", lastChecked:SEED_LAST_CHECKED};
 
   function fmtRelative(iso){
     if(!iso) return "ismeretlen";

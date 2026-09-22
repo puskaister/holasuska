@@ -303,6 +303,7 @@
 (function(){
   var CATEGORY_LABEL = {jogalkotas:"Jogalkotás", vita:"Vita és kritika", elemzes:"Elemzés", alapinfo:"Alapinfo"};
 
+  // SEED_TIMELINE:START — generated from the "articles" collection, section "hirfolyam". Replace this whole array literal (up to SEED_TIMELINE:END) to update.
   var SEED_TIMELINE = [
     {id:"telex-20260710", date:"2026-07-10", dateLabel:"2026. júl. 10.", category:"jogalkotas", source:"Telex", title:"Benyújtotta a kormány a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatalt létrehozó törvényjavaslatot", url:"https://telex.hu/belfold/2026/07/10/nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-hivatal-torvenyjavaslat-benyujtas", summary:"A kormány benyújtotta az NVVH-t létrehozó törvényjavaslatot az Országgyűlésnek."},
     {id:"index-20260728", date:"2026-07-28", dateLabel:"2026. júl. 28.", category:"jogalkotas", source:"Index", title:"Megszavazta a parlament, jön a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal", url:"https://index.hu/belfold/2026/07/28/orszaggyules-parlament-nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-hivatal-nvvh/", summary:"Az Országgyűlés 143 igen szavazattal elfogadta a hivatalt létrehozó törvényt."},
@@ -314,7 +315,9 @@
     {id:"hetek-202609", date:"2026-09-10", dateLabel:"2026. szeptember", category:"elemzes", source:"Hetek", title:"Aggályok és kritikák kereszttüzében a Vagyonvisszaszerzési Hivatal", url:"https://www.hetek.hu/cikkek/belfold/2026szeptember/aggalyok-es-kritikak-kereszttuzeben-a-vagyonvisszaszerzesi", summary:"Áttekintés az alkotmányos és szakmai aggályokról, amelyek a hivatal felállítása kapcsán felmerültek."},
     {id:"index-20260921", date:"2026-09-21", dateLabel:"2026. szept. 21.", category:"vita", source:"Index", title:"A Fidesz támadásba lendült, a párt szerint 13 alaptörvényi rendelkezést sért az új szuperhivatalról szóló törvény", url:"https://index.hu/belfold/2026/09/21/nemzeti-vagyonvisszaszerzesi-es-vagyonvedelmi-torveny-magyar-peter-orban-viktor-alkotmanybirosag-utolagos-normakontroll/", summary:"A Fidesz–KDNP frakció 46 oldalas beadványban azt állítja, hogy a törvény tucatnyi ponton sérti az Alaptörvényt."}
   ];
+  // SEED_TIMELINE:END
 
+  // SEED_REFERENCE:START — generated from the "articles" collection, section "hatter". Replace this whole array literal (up to SEED_REFERENCE:END) to update.
   var SEED_REFERENCE = [
     {id:"wikipedia-nvvh", source:"Wikipédia", title:"Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal", url:"https://hu.wikipedia.org/wiki/Nemzeti_Vagyonvisszaszerz%C3%A9si_%C3%A9s_Vagyonv%C3%A9delmi_Hivatal"},
     {id:"jogtar-nvvh-tv", source:"Jogtár", title:"2026. évi XXXIV. törvény a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatalról", url:"https://net.jogtar.hu/jogszabaly?docid=a2600034.tv"},
@@ -324,8 +327,11 @@
     {id:"mfor-kihirdettek", source:"mfor.hu", title:"Kihirdették: különleges jogállású szerv lesz a vagyonvisszaszerzési hivatal", url:"https://mfor.hu/cikkek/kozerdeku/kihirdettek-kulonleges-jogallasu-szerv-vagyonvisszaszerzesi-hivatal.html"},
     {id:"drujvary-elemzes", source:"drujvary.hu", title:"Eltűnt vagyon és a Hivatal: tényleg visszaszerezhető minden?", url:"https://drujvary.hu/nemzeti-vagyonvisszaszerzesi-es-vedelmi-hivatal/"}
   ];
+  // SEED_REFERENCE:END
 
+  // SEED_LAST_CHECKED:START — ISO 8601 UTC timestamp of the last automated check. Replace the string value up to SEED_LAST_CHECKED:END to update.
   var SEED_LAST_CHECKED = "2026-09-22T00:00:00.000Z";
+  // SEED_LAST_CHECKED:END
   var state = {timeline: SEED_TIMELINE.slice(), reference: SEED_REFERENCE.slice(), filter:"mind", lastChecked:SEED_LAST_CHECKED};
 
   function fmtRelative(iso){

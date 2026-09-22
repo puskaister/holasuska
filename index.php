@@ -29,7 +29,7 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Vagyonvédelmi Napló</title>
+<title>NVVH témájú cikkek egy oldalon</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -310,7 +310,7 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
       <text x="28" y="37" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6" fill="var(--ink-soft)" letter-spacing="1.5">FIGYELŐ</text>
     </svg>
     <div class="masthead-text">
-      <h1>Vagyonvédelmi Napló</h1>
+      <h1>NVVH témájú cikkek egy oldalon</h1>
       <div class="subtitle">Élőben frissülő hírfolyam a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal (NVVH) felállításáról, jogszabályi hátteréről és az azt övező vitákról.</div>
       <div class="status-row">
         <span class="dot" id="status-dot"></span>

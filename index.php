@@ -134,6 +134,21 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
   }
   .status-row strong{color:var(--ink);font-weight:500;}
 
+  .support-form{margin-left:auto;flex:none;align-self:center;}
+  .support-btn{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.78rem;
+    letter-spacing:0.02em;
+    padding:9px 16px;
+    border-radius:999px;
+    border:1px solid var(--brass);
+    background:transparent;
+    color:var(--brass-strong);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .support-btn:hover{background:var(--brass);color:var(--paper);}
+
   /* filters */
   .filters{
     display:flex;
@@ -319,6 +334,13 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
         <span id="article-count">— bejegyzés</span>
       </div>
     </div>
+    <form class="support-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+      <input type="hidden" name="cmd" value="_donations">
+      <input type="hidden" name="business" value="info@pshonlap.hu">
+      <input type="hidden" name="currency_code" value="HUF">
+      <input type="hidden" name="item_name" value="Támogatás – NVVH Figyelő">
+      <button type="submit" class="support-btn">Támogasd a munkánkat</button>
+    </form>
   </div>
 
   <div class="filters" id="filters" role="group" aria-label="Szűrés kategória szerint">

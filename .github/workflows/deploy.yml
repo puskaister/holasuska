@@ -1,0 +1,31 @@
+name: Deploy holasuska FTP-n
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # kézzel is indítható a GitHub "Actions" fülén
+
+jobs:
+  ftp-deploy:
+    name: FTP feltöltés a tárhelyre
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kód letöltése
+        uses: actions/checkout@v4
+
+      - name: Feltöltés FTP-n
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./
+          server-dir: www/holasuska.hu/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/config.php
+            **/setup.php
+            **/README.md

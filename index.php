@@ -311,7 +311,7 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
     </svg>
     <div class="masthead-text">
       <h1>NVVH témájú cikkek egy oldalon</h1>
-      <div class="subtitle">Élőben frissülő hírfolyam a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal (NVVH) felállításáról, jogszabályi hátteréről és az azt övező vitákról.</div>
+      <div class="subtitle">Kövesd a SUSKA útját</div>
       <div class="status-row">
         <span class="dot" id="status-dot"></span>
         <span>Utolsó ellenőrzés: <strong id="last-checked">—</strong></span>

@@ -91,25 +91,42 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
   /* masthead */
   .masthead{
     display:flex;
-    align-items:flex-start;
-    gap:16px;
+    flex-direction:column;
+    gap:14px;
     padding-bottom:20px;
     border-bottom:2px solid var(--ink);
     margin-bottom:6px;
-    flex-wrap:wrap;
+  }
+  .masthead-title-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
   }
   .seal{flex:none;width:56px;height:56px;}
+  .title-wrap{flex:1;min-width:0;container-type:inline-size;}
+  .masthead-foot{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
   .masthead-text{flex:1;min-width:220px;}
   h1{
     font-family:"Fraunces",serif;
     font-weight:600;
-    font-size:clamp(1.7rem,5vw,2.35rem);
-    margin:0 0 4px;
+    font-size:clamp(1.35rem,5.2vw,2.35rem);
+    margin:0;
     letter-spacing:-0.01em;
   }
   h1 .dropcap{
     font-size:1.55em;
     font-weight:700;
+  }
+  @container (min-width:460px){
+    h1{
+      font-size:3.5cqw;
+      white-space:nowrap;
+    }
   }
   .subtitle{
     color:var(--ink-soft);
@@ -137,7 +154,7 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
   }
   .status-row strong{color:var(--ink);font-weight:500;}
 
-  .support-form{margin-left:auto;flex:none;align-self:center;}
+  .support-form{margin-left:auto;flex:none;}
   .support-btn{
     font-family:"IBM Plex Mono",monospace;
     font-size:0.78rem;
@@ -321,31 +338,37 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 
 <div class="page">
   <div class="masthead">
-    <svg class="seal" viewBox="0 0 56 56" aria-hidden="true">
-      <circle cx="28" cy="28" r="26" fill="none" stroke="var(--brass)" stroke-width="1.4"/>
-      <circle cx="28" cy="28" r="21" fill="none" stroke="var(--brass)" stroke-width="1"/>
-      <text x="28" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--brass)" letter-spacing="1">NVVH</text>
-      <text x="28" y="37" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6" fill="var(--ink-soft)" letter-spacing="1.5">FIGYELŐ</text>
-    </svg>
-    <div class="masthead-text">
-      <h1><span class="dropcap">N</span>emzeti <span class="dropcap">V</span>agyonvisszaszerzési és <span class="dropcap">V</span>agyonvédelmi <span class="dropcap">H</span>ivatal</h1>
-      <div class="subtitle">Az NVVH-ról szóló cikkek egy helyen, hogy ne neked kelljen vadászni rájuk és legyél képben!</div>
-      <div class="status-row">
-        <span class="dot" id="status-dot"></span>
-        <span>Utolsó ellenőrzés: <strong id="last-checked">—</strong></span>
-        <span>·</span>
-        <span id="article-count">— bejegyzés</span>
+    <div class="masthead-title-row">
+      <svg class="seal" viewBox="0 0 56 56" aria-hidden="true">
+        <circle cx="28" cy="28" r="26" fill="none" stroke="var(--brass)" stroke-width="1.4"/>
+        <circle cx="28" cy="28" r="21" fill="none" stroke="var(--brass)" stroke-width="1"/>
+        <text x="28" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--brass)" letter-spacing="1">NVVH</text>
+        <text x="28" y="37" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6" fill="var(--ink-soft)" letter-spacing="1.5">FIGYELŐ</text>
+      </svg>
+      <div class="title-wrap">
+        <h1><span class="dropcap">N</span>emzeti <span class="dropcap">V</span>agyonvisszaszerzési és <span class="dropcap">V</span>agyonvédelmi <span class="dropcap">H</span>ivatal</h1>
       </div>
     </div>
-    <form class="support-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
-      <input type="hidden" name="cmd" value="_xclick">
-      <input type="hidden" name="business" value="info@pshonlap.hu">
-      <input type="hidden" name="currency_code" value="HUF">
-      <input type="hidden" name="amount" value="3000">
-      <input type="hidden" name="no_shipping" value="1">
-      <input type="hidden" name="item_name" value="Támogatás – NVVH Figyelő">
-      <button type="submit" class="support-btn">Támogasd a munkánkat ha tudod</button>
-    </form>
+    <div class="masthead-foot">
+      <div class="masthead-text">
+        <div class="subtitle">Az NVVH-ról szóló cikkek egy helyen, hogy ne neked kelljen vadászni rájuk és legyél képben!</div>
+        <div class="status-row">
+          <span class="dot" id="status-dot"></span>
+          <span>Utolsó ellenőrzés: <strong id="last-checked">—</strong></span>
+          <span>·</span>
+          <span id="article-count">— bejegyzés</span>
+        </div>
+      </div>
+      <form class="support-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+        <input type="hidden" name="cmd" value="_xclick">
+        <input type="hidden" name="business" value="info@pshonlap.hu">
+        <input type="hidden" name="currency_code" value="HUF">
+        <input type="hidden" name="amount" value="3000">
+        <input type="hidden" name="no_shipping" value="1">
+        <input type="hidden" name="item_name" value="Támogatás – NVVH Figyelő">
+        <button type="submit" class="support-btn">Támogasd a munkánkat ha tudod</button>
+      </form>
+    </div>
   </div>
 
   <div class="filters" id="filters" role="group" aria-label="Szűrés kategória szerint">

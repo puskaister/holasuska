@@ -21,6 +21,12 @@ while ($row = $res->fetch_assoc()) {
     $reference[] = $row;
 }
 
+$videos = [];
+$res = $db->query("SELECT id, dateLabel, source, title, url, summary, image FROM articles WHERE section = 'video' ORDER BY articleDate DESC, id DESC");
+while ($row = $res->fetch_assoc()) {
+    $videos[] = $row;
+}
+
 $lastChecked = null;
 $articleCount = count($timeline) + count($reference);
 $res = $db->query("SELECT lastChecked, articleCount FROM meta_status WHERE id = 1");
@@ -116,6 +122,23 @@ function nvvh_render_reference($item) {
     return '<div class="ref-entry"><a href="'.$url.'" target="_blank" rel="noopener">'.$title.'</a><span class="ref-source">'.htmlspecialchars($source, ENT_QUOTES).'</span></div>';
 }
 
+function nvvh_render_video($item) {
+    $title = htmlspecialchars($item['title'] ?? '', ENT_QUOTES);
+    $url = htmlspecialchars($item['url'] ?? '', ENT_QUOTES);
+    $source = htmlspecialchars($item['source'] ?? '', ENT_QUOTES);
+    $dateLabel = htmlspecialchars($item['dateLabel'] ?? '', ENT_QUOTES);
+    $image = htmlspecialchars($item['image'] ?? '', ENT_QUOTES);
+    $thumb = $image ? '<img src="'.$image.'" alt="" loading="lazy" referrerpolicy="no-referrer">' : '';
+    return '<article class="video-card">' .
+        '<a class="video-thumb" href="'.$url.'" target="_blank" rel="noopener">' .
+          $thumb .
+          '<span class="video-play" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="rgba(33,28,19,0.55)"/><path d="M19 15l16 9-16 9z" fill="#f6f1e4"/></svg></span>' .
+        '</a>' .
+        '<h3 class="video-title"><a href="'.$url.'" target="_blank" rel="noopener">'.$title.'</a></h3>' .
+        '<div class="video-meta">'.$source.' · '.$dateLabel.'</div>' .
+      '</article>';
+}
+
 $timelineAsc = $timeline;
 usort($timelineAsc, function($a, $b) { return strcmp($a['date'] ?? '', $b['date'] ?? ''); });
 $numberById = [];
@@ -133,6 +156,15 @@ if (!$timeline) {
 $referenceHtml = '';
 foreach ($reference as $item) {
     $referenceHtml .= nvvh_render_reference($item);
+}
+
+$videosHtml = '';
+if (!$videos) {
+    $videosHtml = '<div class="empty">Még nincs videó.</div>';
+} else {
+    foreach ($videos as $item) {
+        $videosHtml .= nvvh_render_video($item);
+    }
 }
 
 $jsonLdItems = [];
@@ -481,6 +513,46 @@ $jsonLd = [
     color:var(--ink-soft);
   }
 
+  .video-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+    gap:20px;
+  }
+  .video-card{display:flex;flex-direction:column;}
+  .video-thumb{
+    position:relative;
+    display:block;
+    aspect-ratio:16/9;
+    border-radius:10px;
+    overflow:hidden;
+    background:var(--paper-raised);
+  }
+  .video-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .video-play{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .video-play svg{width:44px;height:44px;}
+  .video-title{
+    margin:8px 0 0;
+    font-family:"Fraunces",serif;
+    font-weight:500;
+    font-size:0.95rem;
+    line-height:1.35;
+    text-wrap:balance;
+  }
+  .video-title a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule);}
+  .video-title a:hover{border-bottom-color:var(--brass);}
+  .video-meta{
+    margin-top:4px;
+    font-size:0.74rem;
+    color:var(--ink-soft);
+    font-family:"IBM Plex Mono",monospace;
+  }
+
   footer{
     margin-top:44px;
     padding-top:16px;
@@ -540,6 +612,9 @@ $jsonLd = [
 
   <h2 class="section-heading">NVVH hírek időrendben</h2>
   <section class="timeline" id="timeline"><?= $timelineHtml ?></section>
+
+  <h2 class="section-heading">Videók</h2>
+  <div class="video-grid" id="video-grid"><?= $videosHtml ?></div>
 
   <h2 class="section-heading">Háttér és jogszabályok</h2>
   <div class="reference-list" id="reference-list"><?= $referenceHtml ?></div>

@@ -9,3 +9,7 @@ define('DB_USER', 'REPLACE_ME');
 define('DB_PASS', 'REPLACE_ME');
 
 define('API_TOKEN', 'REPLACE_ME');
+
+// Admin felület jelszava (hash). Generáld le helyben:
+// php -r "echo password_hash('SAJAT_JELSZO', PASSWORD_DEFAULT);"
+define('ADMIN_PASSWORD_HASH', 'REPLACE_ME');

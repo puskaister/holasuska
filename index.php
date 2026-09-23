@@ -2,6 +2,12 @@
 require __DIR__ . '/db.php';
 $db = get_db();
 
+$stmt = $db->prepare("INSERT INTO page_views (ip, userAgent) VALUES (?, ?)");
+$ip = $_SERVER['REMOTE_ADDR'] ?? null;
+$ua = isset($_SERVER['HTTP_USER_AGENT']) ? substr($_SERVER['HTTP_USER_AGENT'], 0, 255) : null;
+$stmt->bind_param('ss', $ip, $ua);
+$stmt->execute();
+
 $timeline = [];
 $res = $db->query("SELECT id, category, articleDate AS date, dateLabel, source, title, url, summary, image FROM articles WHERE section = 'hirfolyam' ORDER BY articleDate DESC, id DESC");
 while ($row = $res->fetch_assoc()) {

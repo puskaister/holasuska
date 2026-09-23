@@ -21,3 +21,12 @@ CREATE TABLE IF NOT EXISTS meta_status (
 
 INSERT INTO meta_status (id, lastChecked, articleCount) VALUES (1, NULL, 0)
   ON DUPLICATE KEY UPDATE id = id;
+
+CREATE TABLE IF NOT EXISTS page_views (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  viewedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ip VARCHAR(45) NULL,
+  userAgent VARCHAR(255) NULL,
+  INDEX idx_viewedAt (viewedAt),
+  INDEX idx_ip (ip)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

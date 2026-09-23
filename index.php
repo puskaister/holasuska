@@ -134,8 +134,10 @@ function nvvh_render_video($item) {
           $thumb .
           '<span class="video-play" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="rgba(33,28,19,0.55)"/><path d="M19 15l16 9-16 9z" fill="#f6f1e4"/></svg></span>' .
         '</a>' .
-        '<h3 class="video-title"><a href="'.$url.'" target="_blank" rel="noopener">'.$title.'</a></h3>' .
-        '<div class="video-meta">'.$source.' · '.$dateLabel.'</div>' .
+        '<div class="video-body">' .
+          '<h3 class="video-title"><a href="'.$url.'" target="_blank" rel="noopener">'.$title.'</a></h3>' .
+          '<div class="video-meta">'.$source.' · '.$dateLabel.'</div>' .
+        '</div>' .
       '</article>';
 }
 
@@ -358,6 +360,37 @@ $jsonLd = [
   .support-btn:hover{filter:brightness(1.1);}
   .support-btn-amount{font-size:0.68rem;opacity:0.75;}
 
+  /* tabs */
+  .tabs{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:26px 0 0;
+  }
+  .tab{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.8rem;
+    letter-spacing:0.02em;
+    padding:8px 16px;
+    border-radius:999px 999px 0 0;
+    border:1px solid var(--ink);
+    border-bottom:none;
+    background:transparent;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .tab[aria-pressed="true"]{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .tab[aria-pressed="true"]{
+      background:var(--brass-strong);
+      border-color:var(--brass-strong);
+      color:#1a1408;
+    }
+  }
+
   /* filters */
   .filters{
     display:flex;
@@ -514,16 +547,25 @@ $jsonLd = [
   }
 
   .video-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
-    gap:20px;
+    display:flex;
+    flex-direction:column;
+    max-width:640px;
   }
-  .video-card{display:flex;flex-direction:column;}
+  .video-card{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    padding-block:14px;
+    border-top:1px solid var(--rule);
+  }
+  .video-grid .video-card:last-child{border-bottom:1px solid var(--rule);}
   .video-thumb{
     position:relative;
     display:block;
+    flex:none;
+    width:150px;
     aspect-ratio:16/9;
-    border-radius:10px;
+    border-radius:8px;
     overflow:hidden;
     background:var(--paper-raised);
   }
@@ -535,9 +577,10 @@ $jsonLd = [
     align-items:center;
     justify-content:center;
   }
-  .video-play svg{width:44px;height:44px;}
+  .video-play svg{width:34px;height:34px;}
+  .video-body{flex:1;min-width:0;}
   .video-title{
-    margin:8px 0 0;
+    margin:0;
     font-family:"Fraunces",serif;
     font-weight:500;
     font-size:0.95rem;
@@ -551,6 +594,9 @@ $jsonLd = [
     font-size:0.74rem;
     color:var(--ink-soft);
     font-family:"IBM Plex Mono",monospace;
+  }
+  @media (max-width:480px){
+    .video-thumb{width:110px;}
   }
 
   footer{
@@ -603,6 +649,11 @@ $jsonLd = [
     </div>
   </div>
 
+  <div class="tabs" id="tabs" role="tablist" aria-label="Nézet váltás">
+    <button class="tab" data-tab="hirek" aria-pressed="true">Hírek</button>
+    <button class="tab" data-tab="videok" aria-pressed="false">Videók</button>
+  </div>
+
   <div class="filters" id="filters" role="group" aria-label="Szűrés kategória szerint">
     <button class="chip" data-filter="mind" aria-pressed="true">Mind</button>
     <button class="chip" data-filter="jogalkotas" aria-pressed="false">Jogalkotás</button>
@@ -610,11 +661,15 @@ $jsonLd = [
     <button class="chip" data-filter="elemzes" aria-pressed="false">Elemzés</button>
   </div>
 
-  <h2 class="section-heading">NVVH hírek időrendben</h2>
-  <section class="timeline" id="timeline"><?= $timelineHtml ?></section>
+  <div id="hirek-panel">
+    <h2 class="section-heading">NVVH hírek időrendben</h2>
+    <section class="timeline" id="timeline"><?= $timelineHtml ?></section>
+  </div>
 
-  <h2 class="section-heading">Videók</h2>
-  <div class="video-grid" id="video-grid"><?= $videosHtml ?></div>
+  <div id="videok-panel" hidden>
+    <h2 class="section-heading">Videók</h2>
+    <div class="video-grid" id="video-grid"><?= $videosHtml ?></div>
+  </div>
 
   <h2 class="section-heading">Háttér és jogszabályok</h2>
   <div class="reference-list" id="reference-list"><?= $referenceHtml ?></div>
@@ -760,6 +815,18 @@ $jsonLd = [
       c.setAttribute("aria-pressed", String(c === btn));
     });
     renderTimeline();
+  });
+
+  document.getElementById("tabs").addEventListener("click", function(e){
+    var btn = e.target.closest(".tab");
+    if(!btn) return;
+    var tab = btn.dataset.tab;
+    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
+      t.setAttribute("aria-pressed", String(t === btn));
+    });
+    document.getElementById("filters").style.display = tab === "hirek" ? "" : "none";
+    document.getElementById("hirek-panel").hidden = tab !== "hirek";
+    document.getElementById("videok-panel").hidden = tab !== "videok";
   });
 })();
 </script>

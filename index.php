@@ -354,7 +354,7 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
         <div class="subtitle">Az NVVH-ról szóló cikkek egy helyen, hogy ne neked kelljen vadászni rájuk és legyél képben!</div>
         <div class="status-row">
           <span class="dot" id="status-dot"></span>
-          <span>Utolsó ellenőrzés: <strong id="last-checked">—</strong></span>
+          <span>Utolsó frissítés: <strong id="last-checked">—</strong></span>
           <span>·</span>
           <span id="article-count">— bejegyzés</span>
         </div>

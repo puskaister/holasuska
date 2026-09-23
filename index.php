@@ -549,13 +549,12 @@ $jsonLd = [
   .video-grid{
     display:flex;
     flex-direction:column;
-    max-width:640px;
   }
   .video-card{
     display:flex;
-    gap:14px;
-    align-items:flex-start;
-    padding-block:14px;
+    gap:28px;
+    align-items:center;
+    padding-block:24px;
     border-top:1px solid var(--rule);
   }
   .video-grid .video-card:last-child{border-bottom:1px solid var(--rule);}
@@ -563,9 +562,10 @@ $jsonLd = [
     position:relative;
     display:block;
     flex:none;
-    width:150px;
+    width:34%;
+    max-width:340px;
     aspect-ratio:16/9;
-    border-radius:8px;
+    border-radius:10px;
     overflow:hidden;
     background:var(--paper-raised);
   }
@@ -577,26 +577,30 @@ $jsonLd = [
     align-items:center;
     justify-content:center;
   }
-  .video-play svg{width:34px;height:34px;}
+  .video-play svg{width:56px;height:56px;}
   .video-body{flex:1;min-width:0;}
   .video-title{
     margin:0;
     font-family:"Fraunces",serif;
     font-weight:500;
-    font-size:0.95rem;
+    font-size:clamp(1.1rem,2.4vw,1.5rem);
     line-height:1.35;
     text-wrap:balance;
   }
   .video-title a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule);}
   .video-title a:hover{border-bottom-color:var(--brass);}
   .video-meta{
-    margin-top:4px;
-    font-size:0.74rem;
+    margin-top:8px;
+    font-size:0.85rem;
     color:var(--ink-soft);
     font-family:"IBM Plex Mono",monospace;
   }
-  @media (max-width:480px){
-    .video-thumb{width:110px;}
+  @media (max-width:560px){
+    .video-card{gap:14px;padding-block:16px;}
+    .video-thumb{width:38%;}
+    .video-play svg{width:38px;height:38px;}
+    .video-title{font-size:1rem;}
+    .video-meta{font-size:0.74rem;margin-top:4px;}
   }
 
   footer{

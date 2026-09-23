@@ -108,6 +108,10 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
     letter-spacing:-0.01em;
     text-wrap:balance;
   }
+  h1 .dropcap{
+    font-size:1.55em;
+    font-weight:700;
+  }
   .subtitle{
     color:var(--ink-soft);
     font-size:0.92rem;
@@ -325,8 +329,8 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
       <text x="28" y="37" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6" fill="var(--ink-soft)" letter-spacing="1.5">FIGYELŐ</text>
     </svg>
     <div class="masthead-text">
-      <h1>NVVH témájú cikkek egy oldalon</h1>
-      <div class="subtitle">Kövesd a SUSKA útját</div>
+      <h1><span class="dropcap">N</span>emzeti <span class="dropcap">V</span>agyonvisszaszerzési <span class="dropcap">é</span>s <span class="dropcap">V</span>agyonvédelmi <span class="dropcap">H</span>ivatal</h1>
+      <div class="subtitle">Minden cikk egy helyen, hogy ne neked kelljen vadászni rájuk.</div>
       <div class="status-row">
         <span class="dot" id="status-dot"></span>
         <span>Utolsó ellenőrzés: <strong id="last-checked">—</strong></span>
@@ -341,7 +345,7 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
       <input type="hidden" name="amount" value="3000">
       <input type="hidden" name="no_shipping" value="1">
       <input type="hidden" name="item_name" value="Támogatás – NVVH Figyelő">
-      <button type="submit" class="support-btn">Támogasd a munkánkat</button>
+      <button type="submit" class="support-btn">Támogasd a munkánkat ha tudod</button>
     </form>
   </div>
 

@@ -39,6 +39,12 @@ if ($loggedIn) {
     while ($row = $res->fetch_assoc()) $daily[] = $row;
     $maxViews = 1;
     foreach ($daily as $row) $maxViews = max($maxViews, (int)$row['views']);
+
+    $recent = [];
+    $res = $db->query(
+        "SELECT viewedAt, ip, userAgent FROM page_views ORDER BY viewedAt DESC LIMIT 100"
+    );
+    while ($row = $res->fetch_assoc()) $recent[] = $row;
 }
 ?>
 <!doctype html>
@@ -138,6 +144,14 @@ if ($loggedIn) {
   .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
   .logout{font-size:0.8rem;color:var(--ink-soft);text-decoration:none;}
   .logout:hover{color:var(--ink);}
+  h2{
+    font-family:"Fraunces",serif;
+    font-weight:600;
+    font-size:1.15rem;
+    margin:36px 0 12px;
+  }
+  td.ip{font-family:"IBM Plex Mono",monospace;}
+  td.ua{color:var(--ink-soft);font-size:0.78rem;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -175,6 +189,25 @@ if ($loggedIn) {
       <?php endforeach; ?>
       <?php if (!$daily): ?>
       <tr><td colspan="4" style="color:var(--ink-soft);">Még nincs adat.</td></tr>
+      <?php endif; ?>
+    </tbody>
+  </table>
+
+  <h2>Legutóbbi látogatók</h2>
+  <table>
+    <thead>
+      <tr><th>Időpont</th><th>IP cím</th><th>Böngésző</th></tr>
+    </thead>
+    <tbody>
+      <?php foreach ($recent as $row): ?>
+      <tr>
+        <td><?= htmlspecialchars($row['viewedAt']) ?></td>
+        <td class="ip"><?= htmlspecialchars($row['ip'] ?? '—') ?></td>
+        <td class="ua"><?= htmlspecialchars($row['userAgent'] ?? '—') ?></td>
+      </tr>
+      <?php endforeach; ?>
+      <?php if (!$recent): ?>
+      <tr><td colspan="3" style="color:var(--ink-soft);">Még nincs adat.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>

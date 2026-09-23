@@ -335,9 +335,11 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
       </div>
     </div>
     <form class="support-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
-      <input type="hidden" name="cmd" value="_donations">
+      <input type="hidden" name="cmd" value="_xclick">
       <input type="hidden" name="business" value="info@pshonlap.hu">
       <input type="hidden" name="currency_code" value="HUF">
+      <input type="hidden" name="amount" value="3000">
+      <input type="hidden" name="no_shipping" value="1">
       <input type="hidden" name="item_name" value="Támogatás – NVVH Figyelő">
       <button type="submit" class="support-btn">Támogasd a munkánkat</button>
     </form>

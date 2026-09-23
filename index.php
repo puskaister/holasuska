@@ -312,9 +312,9 @@ $jsonLd = [
     letter-spacing:0.02em;
     padding:9px 16px;
     border-radius:14px;
-    border:1px solid var(--brass);
-    background:transparent;
-    color:var(--brass-strong);
+    border:1px solid var(--law);
+    background:var(--law);
+    color:var(--paper);
     cursor:pointer;
     white-space:nowrap;
     display:flex;
@@ -323,7 +323,7 @@ $jsonLd = [
     gap:2px;
     line-height:1.3;
   }
-  .support-btn:hover{background:var(--brass);color:var(--paper);}
+  .support-btn:hover{filter:brightness(1.1);}
   .support-btn-amount{font-size:0.68rem;opacity:0.75;}
 
   /* filters */

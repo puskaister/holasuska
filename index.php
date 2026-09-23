@@ -106,7 +106,6 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
     font-size:clamp(1.7rem,5vw,2.35rem);
     margin:0 0 4px;
     letter-spacing:-0.01em;
-    text-wrap:balance;
   }
   h1 .dropcap{
     font-size:1.55em;
@@ -329,8 +328,8 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
       <text x="28" y="37" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6" fill="var(--ink-soft)" letter-spacing="1.5">FIGYELŐ</text>
     </svg>
     <div class="masthead-text">
-      <h1><span class="dropcap">N</span>emzeti <span class="dropcap">V</span>agyonvisszaszerzési <span class="dropcap">é</span>s <span class="dropcap">V</span>agyonvédelmi <span class="dropcap">H</span>ivatal</h1>
-      <div class="subtitle">Minden cikk egy helyen, hogy ne neked kelljen vadászni rájuk.</div>
+      <h1><span class="dropcap">N</span>emzeti <span class="dropcap">V</span>agyonvisszaszerzési és <span class="dropcap">V</span>agyonvédelmi <span class="dropcap">H</span>ivatal</h1>
+      <div class="subtitle">Az NVVH-ról szóló cikkek egy helyen, hogy ne neked kelljen vadászni rájuk és legyél képben!</div>
       <div class="status-row">
         <span class="dot" id="status-dot"></span>
         <span>Utolsó ellenőrzés: <strong id="last-checked">—</strong></span>

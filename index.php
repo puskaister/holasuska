@@ -28,14 +28,159 @@ if ($row = $res->fetch_assoc()) {
     $lastChecked = $row['lastChecked'];
 }
 
-$jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+$jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP;
+
+$categoryLabels = ['jogalkotas' => 'Jogalkotás', 'vita' => 'Vita és kritika', 'elemzes' => 'Elemzés', 'alapinfo' => 'Alapinfo'];
+
+$metaTitle = 'NVVH – Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal hírfigyelő';
+$metaDescription = 'Napra kész hírfigyelő a Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatalról (NVVH): jogalkotás, viták és elemzések egy helyen, magyar hírportálokból gyűjtve.';
+$canonicalUrl = 'http://holasuska.hu/';
+
+function nvvh_hash_id($str) {
+    $h = 0;
+    $len = strlen($str);
+    for ($i = 0; $i < $len; $i++) {
+        $h = ($h * 31 + ord($str[$i])) & 0xFFFFFFFF;
+    }
+    return $h;
+}
+
+function nvvh_category_color_var($cat) {
+    if ($cat === 'jogalkotas') return 'var(--law)';
+    if ($cat === 'vita') return 'var(--dispute)';
+    if ($cat === 'elemzes') return 'var(--analysis)';
+    return 'var(--brass)';
+}
+
+function nvvh_entry_visual_svg($item, $no) {
+    $h = nvvh_hash_id($item['id']);
+    $rayCount = 10 + ($h % 5);
+    $rotate = $h % 360;
+    $color = nvvh_category_color_var($item['category'] ?? '');
+    $rays = '';
+    for ($i = 0; $i < $rayCount; $i++) {
+        $angle = (360 / $rayCount) * $i;
+        $rad = $angle * M_PI / 180;
+        $x1 = number_format(50 + cos($rad) * 30, 1, '.', '');
+        $y1 = number_format(50 + sin($rad) * 30, 1, '.', '');
+        $x2 = number_format(50 + cos($rad) * 38, 1, '.', '');
+        $y2 = number_format(50 + sin($rad) * 38, 1, '.', '');
+        $rays .= '<line x1="'.$x1.'" y1="'.$y1.'" x2="'.$x2.'" y2="'.$y2.'" stroke="'.$color.'" stroke-width="1" stroke-linecap="round" opacity="0.65"/>';
+    }
+    $label = '№ ' . str_pad((string)$no, 2, '0', STR_PAD_LEFT);
+    return '<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">' .
+        '<rect width="100" height="100" fill="var(--paper-raised)"/>' .
+        '<g transform="rotate('.$rotate.' 50 50)">'.$rays.'</g>' .
+        '<circle cx="50" cy="50" r="29" fill="none" stroke="'.$color.'" stroke-width="1.6"/>' .
+        '<circle cx="50" cy="50" r="23.5" fill="none" stroke="'.$color.'" stroke-width="0.8" opacity="0.55"/>' .
+        '<text x="50" y="53.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="'.$color.'" letter-spacing="0.5">'.htmlspecialchars($label).'</text>' .
+    '</svg>';
+}
+
+function nvvh_entry_visual_html($item, $no) {
+    $fallback = '<div class="entry-fallback">' . nvvh_entry_visual_svg($item, $no) . '</div>';
+    if (empty($item['image'])) return $fallback;
+    $src = htmlspecialchars($item['image'], ENT_QUOTES);
+    return '<img src="'.$src.'" alt="" loading="lazy" referrerpolicy="no-referrer" ' .
+        'onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'block\';">' .
+        '<div class="entry-fallback" style="display:none">' . nvvh_entry_visual_svg($item, $no) . '</div>';
+}
+
+function nvvh_render_entry($item, $no, $categoryLabels) {
+    $cat = $item['category'] ?? '';
+    $label = $categoryLabels[$cat] ?? $cat;
+    $title = htmlspecialchars($item['title'] ?? '', ENT_QUOTES);
+    $url = htmlspecialchars($item['url'] ?? '', ENT_QUOTES);
+    $summary = htmlspecialchars($item['summary'] ?? '', ENT_QUOTES);
+    $source = htmlspecialchars($item['source'] ?? '', ENT_QUOTES);
+    $dateLabel = htmlspecialchars($item['dateLabel'] ?? '', ENT_QUOTES);
+    $visual = nvvh_entry_visual_html($item, $no);
+    return '<article class="entry">' .
+        '<div class="entry-visual">'.$visual.'</div>' .
+        '<div class="entry-body">' .
+          '<div class="entry-head">' .
+            '<span class="entry-date">'.$dateLabel.'</span>' .
+            '<span class="tag '.htmlspecialchars($cat, ENT_QUOTES).'">'.htmlspecialchars($label, ENT_QUOTES).'</span>' .
+          '</div>' .
+          '<h3 class="entry-title"><a href="'.$url.'" target="_blank" rel="noopener">'.$title.'</a></h3>' .
+          '<div class="entry-summary">'.$summary.'</div>' .
+          '<div class="entry-source">'.$source.'</div>' .
+        '</div>' .
+      '</article>';
+}
+
+function nvvh_render_reference($item) {
+    $title = htmlspecialchars($item['title'] ?? '', ENT_QUOTES);
+    $url = htmlspecialchars($item['url'] ?? '', ENT_QUOTES);
+    $source = htmlspecialchars($item['source'] ?? '', ENT_QUOTES);
+    return '<div class="ref-entry"><a href="'.$url.'" target="_blank" rel="noopener">'.$title.'</a><span class="ref-source">'.htmlspecialchars($source, ENT_QUOTES).'</span></div>';
+}
+
+$timelineAsc = $timeline;
+usort($timelineAsc, function($a, $b) { return strcmp($a['date'] ?? '', $b['date'] ?? ''); });
+$numberById = [];
+foreach ($timelineAsc as $idx => $it) { $numberById[$it['id']] = $idx + 1; }
+
+$timelineHtml = '';
+if (!$timeline) {
+    $timelineHtml = '<div class="empty">Nincs bejegyzés ebben a kategóriában.</div>';
+} else {
+    foreach ($timeline as $item) {
+        $timelineHtml .= nvvh_render_entry($item, $numberById[$item['id']] ?? 0, $categoryLabels);
+    }
+}
+
+$referenceHtml = '';
+foreach ($reference as $item) {
+    $referenceHtml .= nvvh_render_reference($item);
+}
+
+$jsonLdItems = [];
+$pos = 1;
+foreach ($timeline as $item) {
+    $jsonLdItems[] = [
+        '@type' => 'ListItem',
+        'position' => $pos++,
+        'url' => $item['url'],
+        'name' => $item['title'],
+    ];
+}
+$jsonLd = [
+    '@context' => 'https://schema.org',
+    '@type' => 'CollectionPage',
+    'name' => $metaTitle,
+    'description' => $metaDescription,
+    'url' => $canonicalUrl,
+    'inLanguage' => 'hu',
+    'about' => [
+        '@type' => 'GovernmentOrganization',
+        'name' => 'Nemzeti Vagyonvisszaszerzési és Vagyonvédelmi Hivatal',
+        'alternateName' => 'NVVH',
+    ],
+    'mainEntity' => [
+        '@type' => 'ItemList',
+        'itemListElement' => $jsonLdItems,
+    ],
+];
 ?>
 <!doctype html>
 <html lang="hu">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NVVH témájú cikkek egy oldalon</title>
+<title><?= htmlspecialchars($metaTitle) ?></title>
+<meta name="description" content="<?= htmlspecialchars($metaDescription) ?>">
+<link rel="canonical" href="<?= htmlspecialchars($canonicalUrl) ?>">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vagyonvédelmi Napló">
+<meta property="og:locale" content="hu_HU">
+<meta property="og:title" content="<?= htmlspecialchars($metaTitle) ?>">
+<meta property="og:description" content="<?= htmlspecialchars($metaDescription) ?>">
+<meta property="og:url" content="<?= htmlspecialchars($canonicalUrl) ?>">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="<?= htmlspecialchars($metaTitle) ?>">
+<meta name="twitter:description" content="<?= htmlspecialchars($metaDescription) ?>">
+<script type="application/ld+json"><?= json_encode($jsonLd, $jsonOpts) ?></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -384,10 +529,11 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
     <button class="chip" data-filter="elemzes" aria-pressed="false">Elemzés</button>
   </div>
 
-  <section class="timeline" id="timeline"></section>
+  <h2 class="section-heading">NVVH hírek időrendben</h2>
+  <section class="timeline" id="timeline"><?= $timelineHtml ?></section>
 
   <h2 class="section-heading">Háttér és jogszabályok</h2>
-  <div class="reference-list" id="reference-list"></div>
+  <div class="reference-list" id="reference-list"><?= $referenceHtml ?></div>
 
   <footer>
     A lista a nyilvános magyar hírportálokon és jogszabálytárakban elérhető cikkeket gyűjti össze a témában. Naponta egyszer automatikusan frissül; az egyes cikkek tartalmáért a forrásul szolgáló kiadványok felelősek. Az adatok forrása: ennek a webhelynek a saját adatbázisa.
@@ -445,6 +591,10 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
     return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
   }
 
+  function escapeHtml(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
   function entryVisualHtml(item, no){
     var fallback = '<div class="entry-fallback">'+entryVisualSvg(item, no)+'</div>';
     if(!item.image) return fallback;
@@ -492,12 +642,12 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
           '<div class="entry-visual">'+entryVisualHtml(item, no)+'</div>' +
           '<div class="entry-body">' +
             '<div class="entry-head">' +
-              '<span class="entry-date">'+item.dateLabel+'</span>' +
-              '<span class="tag '+item.category+'">'+CATEGORY_LABEL[item.category]+'</span>' +
+              '<span class="entry-date">'+escapeHtml(item.dateLabel)+'</span>' +
+              '<span class="tag '+escapeAttr(item.category)+'">'+escapeHtml(CATEGORY_LABEL[item.category])+'</span>' +
             '</div>' +
-            '<div class="entry-title"><a href="'+item.url+'" target="_blank" rel="noopener">'+item.title+'</a></div>' +
-            '<div class="entry-summary">'+item.summary+'</div>' +
-            '<div class="entry-source">'+item.source+'</div>' +
+            '<h3 class="entry-title"><a href="'+escapeAttr(item.url)+'" target="_blank" rel="noopener">'+escapeHtml(item.title)+'</a></h3>' +
+            '<div class="entry-summary">'+escapeHtml(item.summary)+'</div>' +
+            '<div class="entry-source">'+escapeHtml(item.source)+'</div>' +
           '</div>' +
         '</article>';
     }).join("");
@@ -508,8 +658,8 @@ $jsonOpts = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
     el.innerHTML = state.reference.map(function(item){
       return '' +
         '<div class="ref-entry">' +
-          '<a href="'+item.url+'" target="_blank" rel="noopener">'+item.title+'</a>' +
-          '<span class="ref-source">'+item.source+'</span>' +
+          '<a href="'+escapeAttr(item.url)+'" target="_blank" rel="noopener">'+escapeHtml(item.title)+'</a>' +
+          '<span class="ref-source">'+escapeHtml(item.source)+'</span>' +
         '</div>';
     }).join("");
   }

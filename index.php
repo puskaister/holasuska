@@ -311,14 +311,20 @@ $jsonLd = [
     font-size:0.78rem;
     letter-spacing:0.02em;
     padding:9px 16px;
-    border-radius:999px;
+    border-radius:14px;
     border:1px solid var(--brass);
     background:transparent;
     color:var(--brass-strong);
     cursor:pointer;
     white-space:nowrap;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    line-height:1.3;
   }
   .support-btn:hover{background:var(--brass);color:var(--paper);}
+  .support-btn-amount{font-size:0.68rem;opacity:0.75;}
 
   /* filters */
   .filters{
@@ -517,7 +523,10 @@ $jsonLd = [
         <input type="hidden" name="amount" value="3000">
         <input type="hidden" name="no_shipping" value="1">
         <input type="hidden" name="item_name" value="Támogatás – NVVH Figyelő">
-        <button type="submit" class="support-btn">Támogasd a munkánkat ha tudod</button>
+        <button type="submit" class="support-btn">
+          <span>Támogasd a munkánkat ha tudod</span>
+          <span class="support-btn-amount">3000 Ft</span>
+        </button>
       </form>
     </div>
   </div>

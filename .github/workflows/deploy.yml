@@ -27,5 +27,4 @@ jobs:
             **/.git*/**
             **/.github/**
             **/config.php
-            **/setup.php
             **/README.md

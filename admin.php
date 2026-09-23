@@ -1,4 +1,5 @@
 <?php
+// Forgalom-statisztika admin felület
 require __DIR__ . '/db.php';
 session_start();
 

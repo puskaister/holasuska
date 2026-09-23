@@ -21,7 +21,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           local-dir: ./
-          server-dir: www/holasuska.hu/
+          server-dir: ./
           exclude: |
             **/.git*
             **/.git*/**

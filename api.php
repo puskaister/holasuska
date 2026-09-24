@@ -91,29 +91,4 @@ if ($method === 'POST' && $action === 'set_status') {
     json_out(['ok' => true, 'lastChecked' => $lastChecked, 'articleCount' => $articleCount]);
 }
 
-if ($method === 'POST' && $action === 'purge_bot_views') {
-    require_token();
-    function nvvh_is_bot_ua_tmp($ua) {
-        if (!$ua) return true;
-        $ua = strtolower($ua);
-        $needles = ['bot','crawl','spider','slurp','curl','wget','python','go-http-client','okhttp',
-            'java/','libwww','scrapy','headlesschrome','phantomjs','postmanruntime','axios','node-fetch',
-            'facebookexternalhit','whatsapp','telegrambot','semrush','ahrefs','mj12bot','dotbot','petalbot',
-            'yandex','duckduckbot','baiduspider'];
-        foreach ($needles as $n) {
-            if (strpos($ua, $n) !== false) return true;
-        }
-        return false;
-    }
-    $ids = [];
-    $res = $db->query("SELECT id, userAgent FROM page_views");
-    while ($row = $res->fetch_assoc()) {
-        if (nvvh_is_bot_ua_tmp($row['userAgent'])) $ids[] = (int)$row['id'];
-    }
-    if ($ids) {
-        $db->query("DELETE FROM page_views WHERE id IN (" . implode(',', $ids) . ")");
-    }
-    json_out(['ok' => true, 'deleted' => count($ids)]);
-}
-
 json_out(['error' => 'unknown_action'], 404);

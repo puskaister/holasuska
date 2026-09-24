@@ -44,7 +44,12 @@ if ($loggedIn) {
     $res = $db->query(
         "SELECT viewedAt, ip, userAgent FROM page_views ORDER BY viewedAt DESC LIMIT 100"
     );
-    while ($row = $res->fetch_assoc()) $recent[] = $row;
+    while ($row = $res->fetch_assoc()) {
+        $dt = new DateTime($row['viewedAt'], new DateTimeZone('UTC'));
+        $dt->setTimezone(new DateTimeZone('Europe/Budapest'));
+        $row['viewedAt'] = $dt->format('Y-m-d H:i:s');
+        $recent[] = $row;
+    }
 }
 ?>
 <!doctype html>

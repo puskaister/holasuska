@@ -2,11 +2,26 @@
 require __DIR__ . '/db.php';
 $db = get_db();
 
-$stmt = $db->prepare("INSERT INTO page_views (ip, userAgent) VALUES (?, ?)");
+function nvvh_is_bot_ua($ua) {
+    if (!$ua) return true;
+    $ua = strtolower($ua);
+    $needles = ['bot','crawl','spider','slurp','curl','wget','python','go-http-client','okhttp',
+        'java/','libwww','scrapy','headlesschrome','phantomjs','postmanruntime','axios','node-fetch',
+        'facebookexternalhit','whatsapp','telegrambot','semrush','ahrefs','mj12bot','dotbot','petalbot',
+        'yandex','duckduckbot','baiduspider'];
+    foreach ($needles as $n) {
+        if (strpos($ua, $n) !== false) return true;
+    }
+    return false;
+}
+
 $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 $ua = isset($_SERVER['HTTP_USER_AGENT']) ? substr($_SERVER['HTTP_USER_AGENT'], 0, 255) : null;
-$stmt->bind_param('ss', $ip, $ua);
-$stmt->execute();
+if (!nvvh_is_bot_ua($ua)) {
+    $stmt = $db->prepare("INSERT INTO page_views (ip, userAgent) VALUES (?, ?)");
+    $stmt->bind_param('ss', $ip, $ua);
+    $stmt->execute();
+}
 
 $timeline = [];
 $res = $db->query("SELECT id, category, articleDate AS date, dateLabel, source, title, url, summary, image FROM articles WHERE section = 'hirfolyam' ORDER BY articleDate DESC, id DESC");

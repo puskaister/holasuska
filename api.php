@@ -91,4 +91,10 @@ if ($method === 'POST' && $action === 'set_status') {
     json_out(['ok' => true, 'lastChecked' => $lastChecked, 'articleCount' => $articleCount]);
 }
 
+if ($method === 'GET' && $action === 'debug_time') {
+    $res = $db->query("SELECT NOW() AS db_now");
+    $row = $res->fetch_assoc();
+    json_out(['db_now' => $row['db_now'], 'php_now' => date('Y-m-d H:i:s'), 'php_timezone' => date_default_timezone_get()]);
+}
+
 json_out(['error' => 'unknown_action'], 404);

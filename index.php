@@ -18,9 +18,20 @@ function nvvh_is_bot_ua($ua) {
 $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 $ua = isset($_SERVER['HTTP_USER_AGENT']) ? substr($_SERVER['HTTP_USER_AGENT'], 0, 255) : null;
 if (!nvvh_is_bot_ua($ua)) {
-    $stmt = $db->prepare("INSERT INTO page_views (ip, userAgent) VALUES (?, ?)");
-    $stmt->bind_param('ss', $ip, $ua);
-    $stmt->execute();
+    $recentlySeen = false;
+    if ($ip) {
+        $checkStmt = $db->prepare("SELECT 1 FROM page_views WHERE ip = ? AND viewedAt >= (NOW() - INTERVAL 30 MINUTE) LIMIT 1");
+        $checkStmt->bind_param('s', $ip);
+        $checkStmt->execute();
+        $checkStmt->store_result();
+        $recentlySeen = $checkStmt->num_rows > 0;
+        $checkStmt->close();
+    }
+    if (!$recentlySeen) {
+        $stmt = $db->prepare("INSERT INTO page_views (ip, userAgent) VALUES (?, ?)");
+        $stmt->bind_param('ss', $ip, $ua);
+        $stmt->execute();
+    }
 }
 
 $timeline = [];

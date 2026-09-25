@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS page_views (
   lastSeenAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   ip VARCHAR(45) NULL,
   userAgent VARCHAR(255) NULL,
+  clicked TINYINT(1) NOT NULL DEFAULT 0,
+  clickedUrl VARCHAR(600) NULL,
   INDEX idx_viewedAt (viewedAt),
   INDEX idx_ip (ip)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

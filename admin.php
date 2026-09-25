@@ -27,6 +27,8 @@ if ($loggedIn) {
     $totalUnique = (int)($db->query("SELECT COUNT(DISTINCT ip) c FROM page_views")->fetch_assoc()['c']);
     $todayViews = (int)($db->query("SELECT COUNT(*) c FROM page_views WHERE DATE(viewedAt) = CURDATE()")->fetch_assoc()['c']);
     $todayUnique = (int)($db->query("SELECT COUNT(DISTINCT ip) c FROM page_views WHERE DATE(viewedAt) = CURDATE()")->fetch_assoc()['c']);
+    $todayClicked = (int)($db->query("SELECT COUNT(*) c FROM page_views WHERE DATE(viewedAt) = CURDATE() AND clicked = 1")->fetch_assoc()['c']);
+    $todayClickRate = $todayViews > 0 ? round(($todayClicked / $todayViews) * 100) : 0;
 
     $daily = [];
     $res = $db->query(
@@ -42,7 +44,7 @@ if ($loggedIn) {
 
     $recent = [];
     $res = $db->query(
-        "SELECT viewedAt, lastSeenAt, ip, userAgent FROM page_views ORDER BY viewedAt DESC LIMIT 100"
+        "SELECT viewedAt, lastSeenAt, ip, userAgent, clicked, clickedUrl FROM page_views ORDER BY viewedAt DESC LIMIT 100"
     );
     while ($row = $res->fetch_assoc()) {
         $viewedDt = new DateTime($row['viewedAt'], new DateTimeZone('UTC'));
@@ -166,6 +168,8 @@ if ($loggedIn) {
   th.sortable:hover{color:var(--ink);}
   th.sortable .arrow{opacity:0.4;font-size:0.7em;margin-left:3px;}
   th.sortable.sorted .arrow{opacity:1;}
+  .click-yes{color:var(--law, #2f5d4f);font-weight:500;}
+  .click-no{color:var(--ink-soft);}
 </style>
 </head>
 <body>
@@ -187,6 +191,7 @@ if ($loggedIn) {
     <div class="stat"><div class="label">Ma egyedi látogató</div><div class="value"><?= $todayUnique ?></div></div>
     <div class="stat"><div class="label">Összes megtekintés</div><div class="value"><?= $totalViews ?></div></div>
     <div class="stat"><div class="label">Összes egyedi látogató</div><div class="value"><?= $totalUnique ?></div></div>
+    <div class="stat"><div class="label">Ma cikkre kattintott</div><div class="value"><?= $todayClicked ?> <span style="font-size:0.55em;color:var(--ink-soft);">(<?= $todayClickRate ?>%)</span></div></div>
   </div>
   <table>
     <thead>
@@ -213,21 +218,23 @@ if ($loggedIn) {
       <tr>
         <th class="sortable sorted" data-sort="viewedAtTs" data-type="num" data-dir="desc">Időpont <span class="arrow">▼</span></th>
         <th class="sortable" data-sort="durationSec" data-type="num" data-dir="desc">Időtartam <span class="arrow">▼</span></th>
+        <th class="sortable" data-sort="clicked" data-type="num" data-dir="desc">Kattintott <span class="arrow">▼</span></th>
         <th class="sortable" data-sort="ip" data-type="text" data-dir="asc">IP cím <span class="arrow">▼</span></th>
         <th class="sortable" data-sort="userAgent" data-type="text" data-dir="asc">Böngésző <span class="arrow">▼</span></th>
       </tr>
     </thead>
     <tbody>
       <?php foreach ($recent as $row): ?>
-      <tr data-viewedatts="<?= (int)$row['viewedAtTs'] ?>" data-durationsec="<?= (int)$row['durationSec'] ?>" data-ip="<?= htmlspecialchars($row['ip'] ?? '', ENT_QUOTES) ?>" data-useragent="<?= htmlspecialchars($row['userAgent'] ?? '', ENT_QUOTES) ?>">
+      <tr data-viewedatts="<?= (int)$row['viewedAtTs'] ?>" data-durationsec="<?= (int)$row['durationSec'] ?>" data-clicked="<?= (int)$row['clicked'] ?>" data-ip="<?= htmlspecialchars($row['ip'] ?? '', ENT_QUOTES) ?>" data-useragent="<?= htmlspecialchars($row['userAgent'] ?? '', ENT_QUOTES) ?>">
         <td><?= htmlspecialchars($row['viewedAt']) ?></td>
         <td><?= htmlspecialchars($row['durationLabel']) ?></td>
+        <td><?php if ($row['clicked']): ?><span class="click-yes" title="<?= htmlspecialchars($row['clickedUrl'] ?? '', ENT_QUOTES) ?>">✓ igen</span><?php else: ?><span class="click-no">— nem</span><?php endif; ?></td>
         <td class="ip"><?= htmlspecialchars($row['ip'] ?? '—') ?></td>
         <td class="ua"><?= htmlspecialchars($row['userAgent'] ?? '—') ?></td>
       </tr>
       <?php endforeach; ?>
       <?php if (!$recent): ?>
-      <tr><td colspan="4" style="color:var(--ink-soft);">Még nincs adat.</td></tr>
+      <tr><td colspan="5" style="color:var(--ink-soft);">Még nincs adat.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>

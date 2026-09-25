@@ -862,6 +862,15 @@ $jsonLd = [
     document.getElementById("hirek-panel").hidden = tab !== "hirek";
     document.getElementById("videok-panel").hidden = tab !== "videok";
   });
+
+  document.body.addEventListener("click", function(e){
+    var a = e.target.closest('a[target="_blank"]');
+    if(!a) return;
+    try {
+      var blob = new Blob([JSON.stringify({url: a.href})], {type: "application/json"});
+      navigator.sendBeacon("api.php?action=mark_click", blob);
+    } catch(err) {}
+  });
 })();
 </script>
 </body>

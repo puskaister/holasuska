@@ -91,4 +91,39 @@ if ($method === 'POST' && $action === 'set_status') {
     json_out(['ok' => true, 'lastChecked' => $lastChecked, 'articleCount' => $articleCount]);
 }
 
+if ($method === 'POST' && $action === 'mark_click') {
+    // No token: called from public page JS. Scope is narrow (only the caller's own
+    // most recent page_views row, matched by server-derived REMOTE_ADDR) so abuse
+    // potential is limited to a visitor marking their own row as clicked.
+    $d = read_json_body();
+    $url = isset($d['url']) ? substr((string)$d['url'], 0, 600) : null;
+    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+    if ($ip) {
+        $stmt = $db->prepare(
+            "UPDATE page_views SET clicked = 1, clickedUrl = ?
+             WHERE ip = ? AND viewedAt >= (NOW() - INTERVAL 30 MINUTE)
+             ORDER BY viewedAt DESC LIMIT 1"
+        );
+        $stmt->bind_param('ss', $url, $ip);
+        $stmt->execute();
+    }
+    json_out(['ok' => true]);
+}
+
+if ($method === 'POST' && $action === 'migrate_add_clicked') {
+    require_token();
+    $migrated = [];
+    $res = $db->query("SHOW COLUMNS FROM page_views LIKE 'clicked'");
+    if ($res->num_rows === 0) {
+        $db->query("ALTER TABLE page_views ADD COLUMN clicked TINYINT(1) NOT NULL DEFAULT 0 AFTER userAgent");
+        $migrated[] = 'clicked';
+    }
+    $res = $db->query("SHOW COLUMNS FROM page_views LIKE 'clickedUrl'");
+    if ($res->num_rows === 0) {
+        $db->query("ALTER TABLE page_views ADD COLUMN clickedUrl VARCHAR(600) NULL AFTER clicked");
+        $migrated[] = 'clickedUrl';
+    }
+    json_out(['ok' => true, 'migrated' => $migrated]);
+}
+
 json_out(['error' => 'unknown_action'], 404);

@@ -42,12 +42,17 @@ if ($loggedIn) {
 
     $recent = [];
     $res = $db->query(
-        "SELECT viewedAt, ip, userAgent FROM page_views ORDER BY viewedAt DESC LIMIT 100"
+        "SELECT viewedAt, lastSeenAt, ip, userAgent FROM page_views ORDER BY viewedAt DESC LIMIT 100"
     );
     while ($row = $res->fetch_assoc()) {
-        $dt = new DateTime($row['viewedAt'], new DateTimeZone('UTC'));
-        $dt->setTimezone(new DateTimeZone('Europe/Budapest'));
-        $row['viewedAt'] = $dt->format('Y-m-d H:i:s');
+        $viewedDt = new DateTime($row['viewedAt'], new DateTimeZone('UTC'));
+        $lastSeenDt = new DateTime($row['lastSeenAt'] ?? $row['viewedAt'], new DateTimeZone('UTC'));
+        $durationSec = max(0, $lastSeenDt->getTimestamp() - $viewedDt->getTimestamp());
+        $viewedDt->setTimezone(new DateTimeZone('Europe/Budapest'));
+        $row['viewedAt'] = $viewedDt->format('Y-m-d H:i:s');
+        $row['viewedAtTs'] = $viewedDt->getTimestamp();
+        $row['durationSec'] = $durationSec;
+        $row['durationLabel'] = $durationSec < 60 ? '< 1 perc' : round($durationSec / 60) . ' perc';
         $recent[] = $row;
     }
 }
@@ -157,6 +162,10 @@ if ($loggedIn) {
   }
   td.ip{font-family:"IBM Plex Mono",monospace;}
   td.ua{color:var(--ink-soft);font-size:0.78rem;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  th.sortable{cursor:pointer;user-select:none;white-space:nowrap;}
+  th.sortable:hover{color:var(--ink);}
+  th.sortable .arrow{opacity:0.4;font-size:0.7em;margin-left:3px;}
+  th.sortable.sorted .arrow{opacity:1;}
 </style>
 </head>
 <body>
@@ -199,23 +208,63 @@ if ($loggedIn) {
   </table>
 
   <h2>Legutóbbi látogatók</h2>
-  <table>
+  <table id="recent-table">
     <thead>
-      <tr><th>Időpont</th><th>IP cím</th><th>Böngésző</th></tr>
+      <tr>
+        <th class="sortable sorted" data-sort="viewedAtTs" data-type="num" data-dir="desc">Időpont <span class="arrow">▼</span></th>
+        <th class="sortable" data-sort="durationSec" data-type="num" data-dir="desc">Időtartam <span class="arrow">▼</span></th>
+        <th class="sortable" data-sort="ip" data-type="text" data-dir="asc">IP cím <span class="arrow">▼</span></th>
+        <th class="sortable" data-sort="userAgent" data-type="text" data-dir="asc">Böngésző <span class="arrow">▼</span></th>
+      </tr>
     </thead>
     <tbody>
       <?php foreach ($recent as $row): ?>
-      <tr>
+      <tr data-viewedatts="<?= (int)$row['viewedAtTs'] ?>" data-durationsec="<?= (int)$row['durationSec'] ?>" data-ip="<?= htmlspecialchars($row['ip'] ?? '', ENT_QUOTES) ?>" data-useragent="<?= htmlspecialchars($row['userAgent'] ?? '', ENT_QUOTES) ?>">
         <td><?= htmlspecialchars($row['viewedAt']) ?></td>
+        <td><?= htmlspecialchars($row['durationLabel']) ?></td>
         <td class="ip"><?= htmlspecialchars($row['ip'] ?? '—') ?></td>
         <td class="ua"><?= htmlspecialchars($row['userAgent'] ?? '—') ?></td>
       </tr>
       <?php endforeach; ?>
       <?php if (!$recent): ?>
-      <tr><td colspan="3" style="color:var(--ink-soft);">Még nincs adat.</td></tr>
+      <tr><td colspan="4" style="color:var(--ink-soft);">Még nincs adat.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
+  <script>
+  (function(){
+    var table = document.getElementById('recent-table');
+    if (!table) return;
+    var tbody = table.querySelector('tbody');
+    var headers = table.querySelectorAll('th.sortable');
+    Array.prototype.forEach.call(headers, function(th){
+      th.addEventListener('click', function(){
+        var key = th.dataset.sort;
+        var type = th.dataset.type;
+        var dir = th.dataset.dir === 'asc' ? 'desc' : 'asc';
+        th.dataset.dir = dir;
+        Array.prototype.forEach.call(headers, function(h){
+          h.classList.remove('sorted');
+          h.querySelector('.arrow').textContent = '▼';
+        });
+        th.classList.add('sorted');
+        th.querySelector('.arrow').textContent = dir === 'asc' ? '▲' : '▼';
+
+        var attr = 'data-' + key.toLowerCase();
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr[' + attr + ']'));
+        rows.sort(function(a, b){
+          var av = a.getAttribute(attr), bv = b.getAttribute(attr);
+          if (type === 'num') { av = Number(av); bv = Number(bv); }
+          else { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+          if (av < bv) return dir === 'asc' ? -1 : 1;
+          if (av > bv) return dir === 'asc' ? 1 : -1;
+          return 0;
+        });
+        rows.forEach(function(r){ tbody.appendChild(r); });
+      });
+    });
+  })();
+  </script>
 <?php endif; ?>
 </div>
 </body>

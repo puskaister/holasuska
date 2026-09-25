@@ -18,17 +18,21 @@ function nvvh_is_bot_ua($ua) {
 $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 $ua = isset($_SERVER['HTTP_USER_AGENT']) ? substr($_SERVER['HTTP_USER_AGENT'], 0, 255) : null;
 if (!nvvh_is_bot_ua($ua)) {
-    $recentlySeen = false;
+    $recentId = null;
     if ($ip) {
-        $checkStmt = $db->prepare("SELECT 1 FROM page_views WHERE ip = ? AND viewedAt >= (NOW() - INTERVAL 30 MINUTE) LIMIT 1");
+        $checkStmt = $db->prepare("SELECT id FROM page_views WHERE ip = ? AND viewedAt >= (NOW() - INTERVAL 30 MINUTE) ORDER BY viewedAt DESC LIMIT 1");
         $checkStmt->bind_param('s', $ip);
         $checkStmt->execute();
-        $checkStmt->store_result();
-        $recentlySeen = $checkStmt->num_rows > 0;
+        $checkStmt->bind_result($recentIdResult);
+        if ($checkStmt->fetch()) $recentId = $recentIdResult;
         $checkStmt->close();
     }
-    if (!$recentlySeen) {
-        $stmt = $db->prepare("INSERT INTO page_views (ip, userAgent) VALUES (?, ?)");
+    if ($recentId) {
+        $updateStmt = $db->prepare("UPDATE page_views SET lastSeenAt = NOW() WHERE id = ?");
+        $updateStmt->bind_param('i', $recentId);
+        $updateStmt->execute();
+    } else {
+        $stmt = $db->prepare("INSERT INTO page_views (ip, userAgent, lastSeenAt) VALUES (?, ?, NOW())");
         $stmt->bind_param('ss', $ip, $ua);
         $stmt->execute();
     }

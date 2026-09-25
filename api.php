@@ -91,15 +91,4 @@ if ($method === 'POST' && $action === 'set_status') {
     json_out(['ok' => true, 'lastChecked' => $lastChecked, 'articleCount' => $articleCount]);
 }
 
-if ($method === 'POST' && $action === 'migrate_add_last_seen') {
-    require_token();
-    $res = $db->query("SHOW COLUMNS FROM page_views LIKE 'lastSeenAt'");
-    if ($res->num_rows === 0) {
-        $db->query("ALTER TABLE page_views ADD COLUMN lastSeenAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER viewedAt");
-        $db->query("UPDATE page_views SET lastSeenAt = viewedAt");
-        json_out(['ok' => true, 'migrated' => true]);
-    }
-    json_out(['ok' => true, 'migrated' => false, 'reason' => 'already exists']);
-}
-
 json_out(['error' => 'unknown_action'], 404);

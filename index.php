@@ -1,4 +1,5 @@
 <?php
+header('Cache-Control: no-cache');
 require __DIR__ . '/db.php';
 $db = get_db();
 
@@ -840,6 +841,22 @@ $jsonLd = [
   function renderAll(){ renderStatus(); renderTimeline(); renderReference(); }
   renderAll();
   setInterval(renderStatus, 60000);
+
+  // Pull fresh data so a tab left open picks up later updates (every 10 min, and on returning to the tab).
+  function refreshData(){
+    fetch("api.php?action=list", {cache: "no-store"})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(!d || !d.timeline) return;
+        var changed = d.timeline.length !== state.timeline.length || d.reference.length !== state.reference.length;
+        state.lastChecked = (d.status && d.status.lastChecked) || state.lastChecked;
+        if(changed){ state.timeline = d.timeline; state.reference = d.reference; renderAll(); }
+        else renderStatus();
+      })
+      .catch(function(){});
+  }
+  setInterval(refreshData, 600000);
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) refreshData(); });
 
   document.getElementById("filters").addEventListener("click", function(e){
     var btn = e.target.closest(".chip");

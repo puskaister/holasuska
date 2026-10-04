@@ -23,6 +23,42 @@ function read_json_body() {
     return $data;
 }
 
+// Fetch an article page and return its og:image (or twitter:image) URL, or null.
+// Parses the HTML with DOMDocument so meta tags split across lines (e.g. Economx) still match.
+function fetch_og_image($url) {
+    if (!preg_match('#^https?://#i', $url)) return null;
+    $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36';
+    $html = false;
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 5,
+            CURLOPT_TIMEOUT => 15, CURLOPT_USERAGENT => $ua, CURLOPT_HTTPHEADER => ['Accept-Language: hu'],
+        ]);
+        $html = curl_exec($ch);
+    } else {
+        $ctx = stream_context_create(['http' => ['timeout' => 15, 'header' => "User-Agent: $ua\r\nAccept-Language: hu\r\n"]]);
+        $html = @file_get_contents($url, false, $ctx);
+    }
+    if (!$html) return null;
+    $doc = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $doc->loadHTML('<?xml encoding="utf-8"?>' . $html);
+    libxml_clear_errors();
+    $found = [];
+    foreach ($doc->getElementsByTagName('meta') as $m) {
+        $key = strtolower($m->getAttribute('property') ?: $m->getAttribute('name'));
+        $content = trim($m->getAttribute('content'));
+        if ($content !== '' && in_array($key, ['og:image', 'og:image:url', 'og:image:secure_url', 'twitter:image', 'twitter:image:src'], true) && !isset($found[$key])) {
+            $found[$key] = $content;
+        }
+    }
+    foreach (['og:image', 'og:image:secure_url', 'og:image:url', 'twitter:image', 'twitter:image:src'] as $k) {
+        if (isset($found[$k]) && preg_match('#^https?://#i', $found[$k])) return $found[$k];
+    }
+    return null;
+}
+
 $db = get_db();
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
@@ -70,10 +106,32 @@ if ($method === 'POST' && $action === 'upsert_article') {
     $date = $d['date'] ?? null;
     $dateLabel = $d['dateLabel'] ?? null;
     $summary = $d['summary'] ?? null;
-    $image = $d['image'] ?? null;
+    $image = !empty($d['image']) ? $d['image'] : fetch_og_image($d['url']);
     $stmt->bind_param('ssssssssss', $d['id'], $d['section'], $category, $date, $dateLabel, $d['source'], $d['title'], $d['url'], $summary, $image);
     $stmt->execute();
-    json_out(['ok' => true, 'id' => $d['id']]);
+    json_out(['ok' => true, 'id' => $d['id'], 'image' => $image]);
+}
+
+if ($method === 'POST' && $action === 'refetch_images') {
+    // Fill in images for articles that have none (?all=1 re-fetches every article).
+    require_token();
+    set_time_limit(300);
+    $where = !empty($_GET['all']) ? "section <> 'hatter'" : "section <> 'hatter' AND (image IS NULL OR image = '')";
+    $res = $db->query("SELECT id, url FROM articles WHERE $where");
+    $stmt = $db->prepare("UPDATE articles SET image = ? WHERE id = ?");
+    $updated = [];
+    $missing = [];
+    while ($row = $res->fetch_assoc()) {
+        $img = fetch_og_image($row['url']);
+        if ($img) {
+            $stmt->bind_param('ss', $img, $row['id']);
+            $stmt->execute();
+            $updated[$row['id']] = $img;
+        } else {
+            $missing[] = $row['id'];
+        }
+    }
+    json_out(['ok' => true, 'updated' => $updated, 'missing' => $missing]);
 }
 
 if ($method === 'POST' && $action === 'set_status') {
